@@ -1,0 +1,11 @@
+To add a new movie via the API, please use a POST request with the following payload format:
+{
+    "original_language": "en",
+    "original_title": "My New Movie",
+    "overview": "A thrilling new movie about adventure.",
+    "popularity": 85.5,
+    "release_date": "2023-01-01",
+    "title": "My New Movie",
+    "vote_average": 8.7,
+    "vote_count": 200
+}
