@@ -1,23 +1,17 @@
-# Movie Web API (Django REST Framework)
+# Movie Web API (Django REST Framework) — TMDB Dataset
 
-A university project that provides a simple **Movie Web API** built with **Django** and **Django REST Framework (DRF)**.
-It exposes endpoints to list movies, fetch popular/top-rated/recent movies, filter by language, and add new movies.
-
-The project includes:
-- A Django app (`MovieWebApi`) with a `DataSet` model for movie records
-- DRF APIViews + pagination
-- A CSV loader script to import a movie dataset into SQLite
-- Unit tests for the API endpoints
+A university project that provides a simple **RESTful Movie API** built with **Django** and **Django REST Framework (DRF)**.  
+The API supports listing movies (paginated), retrieving popular/top‑rated/recent movies, filtering by language, and adding new movies.
 
 ---
 
 ## Tech Stack
 
-- Python 3.11
-- Django 5.0.6
-- Django REST Framework 3.15.1
-- pandas 2.2.2
-- SQLite (db.sqlite3)
+- Python **3.11**
+- Django **5.0.6**
+- Django REST Framework **3.15.1**
+- pandas **2.2.2**
+- Database: **SQLite** (`db.sqlite3`)
 
 ---
 
@@ -26,42 +20,42 @@ The project includes:
 ```
 MovieWebApiProject-final/
 ├─ manage.py
-├─ db.sqlite3
 ├─ requirements.txt
+├─ db.sqlite3
 ├─ TMDB 10000 Movies Dataset.csv
 ├─ Scripts/
 │  └─ load_data.py
-├─ MovieWebApi/                 # Django app (API)
+├─ MovieWebApi/                  # Django app (API)
 │  ├─ models.py
 │  ├─ serializers.py
 │  ├─ views.py
 │  ├─ urls.py
 │  └─ tests.py
-└─ MovieWebApiProject/          # Django project
+└─ MovieWebApiProject/           # Django project
    ├─ settings.py
    ├─ urls.py
-   └─ views.py
+   └─ views.py                   # home page with endpoint links
 ```
 
 ---
 
-## Data Model (Movie)
+## Data Model
 
-Each movie record includes:
+The API uses a `DataSet` model for movies:
 
-- `id` (integer)
 - `original_language` (string)
 - `original_title` (string)
-- `overview` (string)
-- `popularity` (float)
-- `release_date` (YYYY-MM-DD)
+- `overview` (text, optional)
+- `popularity` (float, >= 0)
+- `release_date` (date)
 - `title` (string)
 - `vote_average` (float, 0–10)
-- `vote_count` (integer, >= 0)
+- `vote_count` (int, >= 0)
+- `created_at` (timestamp)
 
 ---
 
-## Setup & Run Locally
+## Setup & Run (Local)
 
 ### 1) Create and activate a virtual environment
 
@@ -88,23 +82,23 @@ python manage.py migrate
 ```
 
 ### 4) (Optional) Load dataset from CSV into the database
-This project includes a loader script using pandas:
+This repo includes a CSV loader script (uses pandas). From the project root, run:
 
 ```bash
 python Scripts/load_data.py
 ```
 
-> Note: The script reads `TMDB 10000 Movies Dataset.csv` and inserts/updates records into SQLite.
+> The CSV file `TMDB 10000 Movies Dataset.csv` is included in this repository.
 
 ### 5) Start the server
 ```bash
 python manage.py runserver
 ```
 
-Open:
+Open in your browser:
 - Home page: `http://127.0.0.1:8000/`
-- Admin: `http://127.0.0.1:8000/admin/`
 - API base: `http://127.0.0.1:8000/api/`
+- Admin: `http://127.0.0.1:8000/admin/`
 
 ---
 
@@ -115,32 +109,32 @@ Base path: `/api/`
 ### 1) List all movies (paginated)
 **GET** `/api/movies/`
 
-Pagination notes:
-- Default page size is **500**
-- You can use:
-  - `?page=2`
-  - `?page_size=100` (max 500)
+Pagination:
+- Default page size: **500**
+- Custom page size (max 500): `?page_size=100`
+- Page number: `?page=2`
+
+Example:
+```
+/api/movies/?page=1&page_size=200
+```
 
 ### 2) Popular movies (top 10)
-**GET** `/api/movies/popular/`
+**GET** `/api/movies/popular/`  
+Returns the **top 10** movies ordered by `popularity` (descending).
 
-Returns the **top 10** movies ordered by popularity (descending).
+### 3) Top‑rated movies (paginated)
+**GET** `/api/movies/top-rated/`  
+Returns movies where `vote_average >= 8.0`, ordered by rating (descending).
 
-### 3) Top-rated movies (vote_average >= 8.0, paginated)
-**GET** `/api/movies/top-rated/`
+### 4) Movies by language (paginated)
+**GET** `/api/movies/language/?lang=en`  
+Query param:
+- `lang` (defaults to `en` if not provided)
 
-Returns movies with `vote_average >= 8.0` sorted by rating (descending).
-
-### 4) Filter by language (paginated)
-**GET** `/api/movies/language/?lang=en`
-
-Query parameter:
-- `lang` (default: `en`)
-
-### 5) Recent movies (last 5 years, paginated)
-**GET** `/api/movies/recent/`
-
-Returns movies released within the last **5 years**.
+### 5) Recent movies (paginated)
+**GET** `/api/movies/recent/`  
+Returns movies released within the **last 5 years**.
 
 ### 6) Add a movie
 **POST** `/api/movies/add/`
@@ -169,36 +163,19 @@ Validation:
 
 ## Running Tests
 
-This repository includes unit tests for the API routes:
+This repository includes API unit tests.
 
 ```bash
 python manage.py test
 ```
 
-Tests cover:
-- movie list
-- popular movies
-- top-rated movies
-- movies filtered by language
-- recent movies
-- adding a movie via POST
-
 ---
 
-## Admin (Optional)
+## Admin Notes (Coursework)
 
-Create an admin user:
+The home page view may display example admin credentials for demonstration.  
+If you publish this repo publicly, **change/remove any default credentials** and create your own superuser:
 
 ```bash
 python manage.py createsuperuser
 ```
-
-Then log in at:
-`http://127.0.0.1:8000/admin/`
-
----
-
-## Notes / Limitations
-
-- This is a coursework project intended for learning REST APIs, Django models, serialization, pagination, and testing.
-- SQLite is used for simplicity (easy local setup). For production, you would typically use PostgreSQL/MySQL and environment variables for configuration.
